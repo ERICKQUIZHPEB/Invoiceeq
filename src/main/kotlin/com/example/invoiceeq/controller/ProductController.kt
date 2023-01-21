@@ -33,6 +33,8 @@ class ProductController {
         return productService.save(product)
 
     }
+
+
     @GetMapping("/products/{stock}")
     fun listStocks(@PathVariable("stock") stock:Long):ResponseEntity<*>{
         return ResponseEntity(productService.findStockMinium(stock), HttpStatus.ACCEPTED)

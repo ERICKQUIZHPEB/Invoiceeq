@@ -20,7 +20,15 @@ class ProductService {
     }
 
     fun save (product: Product):Product{
-        return productRepository.save(product)
+        try{
+            product.stock?.takeIf{ it > 0}
+                    ?:throw  Exception("Stock invalido")
+
+            return productRepository.save(product)
+        }
+        catch(ex:Exception){
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, ex.message)
+        }
     }
 
     fun update(product: Product):Product{
