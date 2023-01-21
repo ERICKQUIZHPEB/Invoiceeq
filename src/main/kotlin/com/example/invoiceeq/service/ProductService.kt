@@ -20,13 +20,33 @@ class ProductService {
     }
 
     fun save (product: Product):Product{
-        return productRepository.save(product)
+        try{
+            product.description?.takeIf{validatePlate(it)}
+                    ?:throw  Exception("Error placa")
+            product.description?.takeIf { it.trim().isNotEmpty()}
+                   ?:throw Exception("Error placa")
+            product.description?.takeIf {!it.contains("-")}
+                    ?:throw Exception("Error placa")
+            product.description?.takeIf {it.matches(Regex("\\d{8}"))}
+                    ?:throw Exception("Error placa")
+            product.description?.takeIf {it.matches(Regex("^[A-Z]{3}-[0-9]{4}$"))}
+                    ?:throw Exception("Error placa")
+            product.description?.takeIf {it.matches(Regex("^(?i)[^W][A-Z]{3}-[0-9]{4}$"))}
+                    ?:throw Exception("Error placa")
+            product.description?.takeIf {it.count{c -> c == '-'}==1}
+                    ?:throw Exception("Error placa")
+
+            return productRepository.save(product)
+        }
+        catch(ex:Exception){
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, ex.message)
+        }
     }
 
     fun update(product: Product):Product{
         try {
             productRepository.findById(product.id)
-                ?: throw Exception("El id ${product.id} en producto no existe")
+                ?: throw Exception("El id ${product.id} en products no existe")
             return productRepository.save(product)
         }
         catch(ex:Exception){
@@ -53,6 +73,10 @@ class ProductService {
             throw  ResponseStatusException(HttpStatus.NOT_FOUND, ex.message)
 
         }
+    }
+
+    fun validatePlate(description: String):Boolean{
+            return true
     }
 
 }
